@@ -68,33 +68,15 @@ void drawKinect()
       stroke(userClr[ (userId - 1) % userClr.length ] );
       drawSkeleton(userId);
       
-        // get the positions of the three joints of our arm
-     PVector rightHand = new PVector();
-     context.getJointPositionSkeleton(userId,SimpleOpenNI.SKEL_RIGHT_HAND,rightHand);
-     PVector rightElbow = new PVector();
-     context.getJointPositionSkeleton(userId,SimpleOpenNI.SKEL_RIGHT_ELBOW,rightElbow);
-     PVector rightShoulder = new PVector();
-     context.getJointPositionSkeleton(userId,SimpleOpenNI.SKEL_RIGHT_SHOULDER,rightShoulder);
-     // we need right hip to orient the shoulder angle
-     PVector rightHip = new PVector();
-     context.getJointPositionSkeleton(userId,SimpleOpenNI.SKEL_RIGHT_HIP,rightHip);
-     
-     // reduce our joint vectors to two dimensions
-     PVector rightHand2D = new PVector(rightHand.x, rightHand.y); 
-     PVector rightElbow2D = new PVector(rightElbow.x, rightElbow.y);
-     PVector rightShoulder2D = new PVector(rightShoulder.x,rightShoulder.y);
-     PVector rightHip2D = new PVector(rightHip.x, rightHip.y);
-     // calculate the axes against which we want to measure our angles
-     PVector torsoOrientation = PVector.sub(rightShoulder2D, rightHip2D); 
-     PVector upperArmOrientation = PVector.sub(rightElbow2D, rightShoulder2D);
-     
-     // calculate the angles between our joints
-     float shoulderAngle = angleOf(rightElbow2D, rightShoulder2D, torsoOrientation);
-     float elbowAngle = angleOf(rightHand2D,rightElbow2D,upperArmOrientation);
+     float[] leftAngles = getArmAngles(userId, BodySide.LEFT);
+     float[] rightAngles = getArmAngles(userId, BodySide.RIGHT);
+
      // show the angles on the screen for debugging
      fill(255,0,0);
-     scale(3);
-     text("shoulder: " + int(shoulderAngle) + "\n" + " elbow: " + int(elbowAngle), 20, 20);
+     scale(1);
+     text("left shoulder: " + int(leftAngles[0]) + "\n" + " elbow: " + int(leftAngles[1]), 20, 20);
+     text("right shoulder: " + int(rightAngles[0]) + "\n" + " elbow: " + int(rightAngles[1]), 80, 20);
+
     }      
       
     // draw the center of mass
@@ -115,6 +97,34 @@ void drawKinect()
       text(Integer.toString(userId),com2d.x,com2d.y);
     }
   }    
+}
+
+float[] getArmAngles(int userId, BodySide side) {
+    // get the positions of the three joints of our arm
+     PVector hand = new PVector();
+     context.getJointPositionSkeleton(userId, side.hand, hand);
+     PVector elbow = new PVector();
+     context.getJointPositionSkeleton(userId, side.elbow, elbow);
+     PVector shoulder = new PVector();
+     context.getJointPositionSkeleton(userId, side.shoulder, shoulder);
+     // we need hip to orient the shoulder angle
+     PVector hip = new PVector();
+     context.getJointPositionSkeleton(userId, side.hip, hip);
+     
+     // reduce our joint vectors to two dimensions
+     PVector hand2D = new PVector(hand.x, hand.y); 
+     PVector elbow2D = new PVector(elbow.x, elbow.y);
+     PVector shoulder2D = new PVector(shoulder.x, shoulder.y);
+     PVector hip2D = new PVector(hip.x, hip.y);
+     // calculate the axes against which we want to measure our angles
+     PVector torsoOrientation = PVector.sub(shoulder2D, hip2D); 
+     PVector upperArmOrientation = PVector.sub(elbow2D, shoulder2D);
+     
+     // calculate the angles between our joints
+     float shoulderAngle = angleOf(elbow2D, shoulder2D, torsoOrientation);
+     float elbowAngle = angleOf(hand2D, elbow2D, upperArmOrientation);
+     
+     return new float[] {shoulderAngle, elbowAngle};
 }
 
 // draw the skeleton with the selected joints
@@ -171,7 +181,7 @@ void onVisibleUser(SimpleOpenNI curContext, int userId)
 }
 
 //Generate the angle
- float angleOf(PVector one, PVector two, PVector axis){
+float angleOf(PVector one, PVector two, PVector axis){
  PVector limb = PVector.sub(two, one);
  return degrees(PVector.angleBetween(limb, axis));
 }
