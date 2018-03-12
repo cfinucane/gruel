@@ -81,7 +81,7 @@ void drawKinect()
         // create new voice
           println("\tstarting voice for: " + userId);
 
-        people.put(userId, new Person(0.5, 0.5, 0.5, out));
+        people.put(userId, new Person(0.5, 0.5, 0.5, 0.5, out));
       }
 
       stroke(userClr[ (userId - 1) % userClr.length ] );
@@ -102,9 +102,8 @@ void drawKinect()
      if (p == null) {
          println("ghost! userId: " + userId);
      } else {
-       p.updateParameters(leftAngles[0]/180, leftAngles[1]/360, rightAngles[0]/180);
+       p.updateParameters(leftAngles[0]/180, leftAngles[1]/360, rightAngles[0]/180, rightAngles[1]/180);
      }
-
     }      
       
    PVector com = new PVector();                                   
