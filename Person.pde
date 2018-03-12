@@ -11,6 +11,7 @@ class Scale {
   
   String nextPitch() {
     index++;
+
     if (index >= notes.length) {
       index = 0;
     }
@@ -57,22 +58,21 @@ class Person {
   Oscil osc, lfo;
   AudioOutput output;
   Gain g;
-  float scale;
+  float pitchRange;
   
-  Person(float delaytime, float interval, float lfoFreq, float bitRes, AudioOutput out) {
+  Person(float delaytime, float lfoDepth, float lfoFreq, float freq, AudioOutput out) {
     output = out;
     
     delay = new Delay(1.0, 0.8, true, true );
     delay.setDelTime(delaytime);
     
-    String pitch = s.nextPitch();
     Waveform oscWave = s.nextWaveform();
-    print(pitch);
-    scale = s.nextMultiple();
-    osc = new Oscil( bitRes*scale, 0.2, oscWave );
+
+    pitchRange = s.nextMultiple();
+    osc = new Oscil( freq*pitchRange, 0.2, oscWave );
     
-    lfoWave = Waves.triangleh( 10 );
-    lfo = new Oscil(lfoFreq , interval, lfoWave );
+    lfoWave = Waves.sawh( 10 );
+    lfo = new Oscil(lfoFreq , lfoDepth, lfoWave );
     
     lfo.offset.setLastValue( 0.3 );
     lfo.patch( osc.amplitude );
@@ -84,11 +84,11 @@ class Person {
     osc.patch(delay).patch(g).patch(output);
   }
   
-  void updateParameters(float delaytime, float interval, float lfoFreq, float bitRes) {
+  void updateParameters(float delaytime, float lfoDepth, float lfoFreq, float freq) {
     delay.setDelTime(delaytime);
-    lfo.setAmplitude(interval);
+    lfo.setAmplitude(lfoDepth);
     lfo.setFrequency(lfoFreq);
-    osc.setFrequency(bitRes*800);
+    osc.setFrequency(freq*pitchRange);
   }
   
   void stop() {
