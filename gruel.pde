@@ -2,6 +2,7 @@
 // based on simpleopenni examples
 
 import SimpleOpenNI.*;
+import java.util.Map;
 
 SimpleOpenNI  context;
 color[]       userClr = new color[]{ color(255,0,0),
@@ -11,8 +12,8 @@ color[]       userClr = new color[]{ color(255,0,0),
                                      color(255,0,255),
                                      color(0,255,255)
                                    };
-PVector com = new PVector();                                   
-PVector com2d = new PVector();                                   
+
+Map<Integer, Person> people = new HashMap<>();
 
 void setup()
 {
@@ -57,12 +58,12 @@ void drawKinect()
   image(context.userImage(),0,0);
   
   int[] userList = context.getUsers();
-  for(int i=0;i<userList.length;i++)
+  for(int i=0; i<userList.length; i++)
   {
     int userId=userList[i];
     
     
-      // draw the skeleton if it's available
+    // draw the skeleton if it's available
     if(context.isTrackingSkeleton(userId))
     {
       stroke(userClr[ (userId - 1) % userClr.length ] );
@@ -79,6 +80,9 @@ void drawKinect()
 
     }      
       
+   PVector com = new PVector();                                   
+   PVector com2d = new PVector();                                   
+
     // draw the center of mass
     if(context.getCoM(userId,com))
     {
@@ -129,14 +133,7 @@ float[] getArmAngles(int userId, BodySide side) {
 
 // draw the skeleton with the selected joints
 void drawSkeleton(int userId)
-{
-  // to get the 3d joint data
-  /*
-  PVector jointPos = new PVector();
-  context.getJointPositionSkeleton(userId,SimpleOpenNI.SKEL_NECK,jointPos);
-  println(jointPos);
-  */
-  
+{  
   context.drawLimb(userId, SimpleOpenNI.SKEL_HEAD, SimpleOpenNI.SKEL_NECK);
 
   context.drawLimb(userId, SimpleOpenNI.SKEL_NECK, SimpleOpenNI.SKEL_LEFT_SHOULDER);
@@ -167,12 +164,14 @@ void onNewUser(SimpleOpenNI curContext, int userId)
   println("onNewUser - userId: " + userId);
   println("\tstart tracking skeleton");
   
+  people.put(userId, new Person());
   curContext.startTrackingSkeleton(userId);
 }
 
 void onLostUser(SimpleOpenNI curContext, int userId)
 {
   println("onLostUser - userId: " + userId);
+  people.remove(userId);
 }
 
 void onVisibleUser(SimpleOpenNI curContext, int userId)
