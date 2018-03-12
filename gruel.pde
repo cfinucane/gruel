@@ -67,16 +67,23 @@ void drawKinect()
   // draw depthImageMap
   //image(context.depthImage(),0,0);
   image(context.userImage(),0,0);
-  
+       fill(255, 255, 255);
+          rect(0, 0, 200, 400);
   int[] userList = context.getUsers();
   for(int i=0; i<userList.length; i++)
   {
     int userId=userList[i];
     
-    
     // draw the skeleton if it's available
     if(context.isTrackingSkeleton(userId))
     {
+      if (!people.containsKey(userId)) {
+        // create new voice
+          println("\tstarting voice for: " + userId);
+
+        people.put(userId, new Person(0.5, 0.5, 0.5, out));
+      }
+
       stroke(userClr[ (userId - 1) % userClr.length ] );
       drawSkeleton(userId);
       
@@ -84,8 +91,11 @@ void drawKinect()
      float[] rightAngles = getArmAngles(userId, BodySide.RIGHT);
 
      // show the angles on the screen for debugging
-     fill(userClr[ (userId - 1) % userClr.length ] );
+
      scale(1);
+
+     fill(userClr[ (userId - 1) % userClr.length ] );
+
      text("left shoulder: " + int(leftAngles[0]) + "\n" + " elbow: " + int(leftAngles[1]), 20, 20+100*(userId-1));
      text("\n\nright shoulder: " + int(rightAngles[0]) + "\n" + " elbow: " + int(rightAngles[1]), 20, 20+100*(userId-1));
      Person p = people.get(userId);
@@ -181,7 +191,6 @@ void onNewUser(SimpleOpenNI curContext, int userId)
   println("onNewUser - userId: " + userId);
   println("\tstart tracking skeleton");
   
-  people.put(userId, new Person(0.5, 0.5, 0.5, out));
   curContext.startTrackingSkeleton(userId);
 }
 
