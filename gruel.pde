@@ -17,7 +17,11 @@ PVector com2d = new PVector();
 void setup()
 {
   size(640,480);
-  
+  setupKinect();
+}
+
+void setupKinect()
+{
   context = new SimpleOpenNI(this);
   if(context.isInit() == false)
   {
@@ -39,7 +43,11 @@ void setup()
   smooth();  
 }
 
-void draw()
+void draw() {
+  drawKinect();
+}
+
+void drawKinect()
 {
   // update the cam
   context.update();
@@ -48,11 +56,13 @@ void draw()
   //image(context.depthImage(),0,0);
   image(context.userImage(),0,0);
   
-  // draw the skeleton if it's available
   int[] userList = context.getUsers();
   for(int i=0;i<userList.length;i++)
   {
     int userId=userList[i];
+    
+    
+      // draw the skeleton if it's available
     if(context.isTrackingSkeleton(userId))
     {
       stroke(userClr[ (userId - 1) % userClr.length ] );
