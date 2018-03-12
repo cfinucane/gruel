@@ -90,6 +90,27 @@ void drawKinect()
      float[] leftAngles = getArmAngles(userId, BodySide.LEFT);
      float[] rightAngles = getArmAngles(userId, BodySide.RIGHT);
 
+       PVector head = new PVector();
+       PVector head2d = new PVector();
+       context.getJointPositionSkeleton(userId, SimpleOpenNI.SKEL_HEAD, head);
+       context.convertRealWorldToProjective(head,head2d);
+       
+       PVector hip = new PVector();
+       PVector hip2d = new PVector();
+       context.getJointPositionSkeleton(userId, BodySide.RIGHT.hip, hip);
+       context.convertRealWorldToProjective(hip,hip2d);
+       
+         rectMode(CENTER);
+
+       fill(255, 255, 255);
+       ellipse(head2d.x-10, head2d.y,10, 10);
+      ellipse(head2d.x+10, head2d.y,10, 10);
+      ellipse(head2d.x, head2d.y+15,20, 2+(float)Math.pow(2,10*(hip2d.y-240)/480));
+
+        rectMode(CORNER);
+
+
+       
      // show the angles on the screen for debugging
 
      scale(1);
@@ -102,10 +123,7 @@ void drawKinect()
      if (p == null) {
          println("ghost! userId: " + userId);
      } else {
-       PVector hip = new PVector();
-       PVector hip2d = new PVector();
-       context.getJointPositionSkeleton(userId, BodySide.LEFT.hip, hip);
-       context.convertRealWorldToProjective(hip,hip2d);
+
        p.updateParameters(leftAngles[0]/180, leftAngles[1]/360, rightAngles[0]/180, rightAngles[1]/180);
      }
     }      
