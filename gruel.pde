@@ -52,14 +52,43 @@ void draw()
   int[] userList = context.getUsers();
   for(int i=0;i<userList.length;i++)
   {
-    if(context.isTrackingSkeleton(userList[i]))
+    int userId=userList[i];
+    if(context.isTrackingSkeleton(userId))
     {
-      stroke(userClr[ (userList[i] - 1) % userClr.length ] );
-      drawSkeleton(userList[i]);
+      stroke(userClr[ (userId - 1) % userClr.length ] );
+      drawSkeleton(userId);
+      
+        // get the positions of the three joints of our arm
+     PVector rightHand = new PVector();
+     context.getJointPositionSkeleton(userId,SimpleOpenNI.SKEL_RIGHT_HAND,rightHand);
+     PVector rightElbow = new PVector();
+     context.getJointPositionSkeleton(userId,SimpleOpenNI.SKEL_RIGHT_ELBOW,rightElbow);
+     PVector rightShoulder = new PVector();
+     context.getJointPositionSkeleton(userId,SimpleOpenNI.SKEL_RIGHT_SHOULDER,rightShoulder);
+     // we need right hip to orient the shoulder angle
+     PVector rightHip = new PVector();
+     context.getJointPositionSkeleton(userId,SimpleOpenNI.SKEL_RIGHT_HIP,rightHip);
+     
+     // reduce our joint vectors to two dimensions
+     PVector rightHand2D = new PVector(rightHand.x, rightHand.y); 
+     PVector rightElbow2D = new PVector(rightElbow.x, rightElbow.y);
+     PVector rightShoulder2D = new PVector(rightShoulder.x,rightShoulder.y);
+     PVector rightHip2D = new PVector(rightHip.x, rightHip.y);
+     // calculate the axes against which we want to measure our angles
+     PVector torsoOrientation = PVector.sub(rightShoulder2D, rightHip2D); 
+     PVector upperArmOrientation = PVector.sub(rightElbow2D, rightShoulder2D);
+     
+     // calculate the angles between our joints
+     float shoulderAngle = angleOf(rightElbow2D, rightShoulder2D, torsoOrientation);
+     float elbowAngle = angleOf(rightHand2D,rightElbow2D,upperArmOrientation);
+     // show the angles on the screen for debugging
+     fill(255,0,0);
+     scale(3);
+     text("shoulder: " + int(shoulderAngle) + "\n" + " elbow: " + int(elbowAngle), 20, 20);
     }      
       
     // draw the center of mass
-    if(context.getCoM(userList[i],com))
+    if(context.getCoM(userId,com))
     {
       context.convertRealWorldToProjective(com,com2d);
       stroke(100,255,0);
@@ -73,7 +102,7 @@ void draw()
       endShape();
       
       fill(0,255,100);
-      text(Integer.toString(userList[i]),com2d.x,com2d.y);
+      text(Integer.toString(userId),com2d.x,com2d.y);
     }
   }    
 }
@@ -131,6 +160,11 @@ void onVisibleUser(SimpleOpenNI curContext, int userId)
   //println("onVisibleUser - userId: " + userId);
 }
 
+//Generate the angle
+ float angleOf(PVector one, PVector two, PVector axis){
+ PVector limb = PVector.sub(two, one);
+ return degrees(PVector.angleBetween(limb, axis));
+}
 
 void keyPressed()
 {
