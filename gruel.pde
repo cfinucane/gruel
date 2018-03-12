@@ -15,7 +15,7 @@ color[]       userClr = new color[]{ color(255,0,0),
                                      color(0,255,255)
                                    };
 
-Map<Integer, Person> people = new HashMap<>();
+Map<Integer, Person> people = new HashMap();
 Minim minim;
 AudioOutput out;
 
@@ -84,10 +84,16 @@ void drawKinect()
      float[] rightAngles = getArmAngles(userId, BodySide.RIGHT);
 
      // show the angles on the screen for debugging
-     fill(255,0,0);
+     fill(userClr[ (userId - 1) % userClr.length ] );
      scale(1);
-     text("left shoulder: " + int(leftAngles[0]) + "\n" + " elbow: " + int(leftAngles[1]), 20, 20);
-     text("right shoulder: " + int(rightAngles[0]) + "\n" + " elbow: " + int(rightAngles[1]), 80, 20);
+     text("left shoulder: " + int(leftAngles[0]) + "\n" + " elbow: " + int(leftAngles[1]), 20, 20+100*(userId-1));
+     text("\n\nright shoulder: " + int(rightAngles[0]) + "\n" + " elbow: " + int(rightAngles[1]), 20, 20+100*(userId-1));
+     Person p = people.get(userId);
+     if (p == null) {
+         println("ghost! userId: " + userId);
+     } else {
+       p.updateParameters(leftAngles[0]/180, leftAngles[1]/360, rightAngles[0]/180);
+     }
 
     }      
       
@@ -175,14 +181,20 @@ void onNewUser(SimpleOpenNI curContext, int userId)
   println("onNewUser - userId: " + userId);
   println("\tstart tracking skeleton");
   
-  people.put(userId, new Person());
+  people.put(userId, new Person(0.5, 0.5, 0.5, out));
   curContext.startTrackingSkeleton(userId);
 }
 
 void onLostUser(SimpleOpenNI curContext, int userId)
 {
   println("onLostUser - userId: " + userId);
-  people.remove(userId);
+  Person p = people.get(userId);
+  if (p == null) {
+    println("death of ghost! userId: " + userId);
+  } else {
+     p.stop();
+     people.remove(userId);
+  }
 }
 
 void onVisibleUser(SimpleOpenNI curContext, int userId)
