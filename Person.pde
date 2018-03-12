@@ -41,13 +41,14 @@ Scale s = new Scale();
 class Person {
   Waveform oscWave, lfoWave;
   Delay delay;
+  BitCrush crush;
   Oscil osc, lfo;
   AudioOutput output;
   
-  Person(float delaytime, float feedback, float lfoFreq, AudioOutput out) {
+  Person(float delaytime, float feedback, float lfoFreq, float bitRes, AudioOutput out) {
     output = out;
     
-    delay = new Delay(0.5, feedback, true, true );
+    delay = new Delay(1.0, feedback, true, true );
     delay.setDelTime(delaytime);
     
     String pitch = s.nextPitch();
@@ -61,13 +62,16 @@ class Person {
     lfo.offset.setLastValue( 0.3 );
     lfo.patch( osc.amplitude );
     
-    osc.patch(delay).patch(output);
+    crush = new BitCrush(bitRes, 44100.0);
+    
+    osc.patch(crush).patch(delay).patch(output);
   }
   
-  void updateParameters(float delaytime, float feedback, float lfoFreq) {
+  void updateParameters(float delaytime, float feedback, float lfoFreq, float bitRes) {
     delay.setDelTime(delaytime);
     delay.setDelAmp(feedback);
     lfo.setFrequency(lfoFreq);
+    crush.setBitRes(bitRes);
   }
   
   void stop() {
