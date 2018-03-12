@@ -102,6 +102,10 @@ void drawKinect()
      if (p == null) {
          println("ghost! userId: " + userId);
      } else {
+       PVector hip = new PVector();
+       PVector hip2d = new PVector();
+       context.getJointPositionSkeleton(userId, BodySide.LEFT.hip, hip);
+       context.convertRealWorldToProjective(hip,hip2d);
        p.updateParameters(leftAngles[0]/180, leftAngles[1]/360, rightAngles[0]/180, rightAngles[1]/180);
      }
     }      

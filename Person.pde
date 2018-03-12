@@ -18,8 +18,22 @@ class Scale {
     return notes[index];
   }
   
+  float nextMultiple() {
+    switch(int(random(4))) {
+      case 0:
+        return 200f;
+      case 1:
+        return 1600f;
+      case 2:
+        return 800f;
+      case 3:
+        return 400f;
+    }
+    return 200f;
+  }
+  
   Wavetable nextWaveform() {
-    switch(int(random(5))) {
+    switch(int(random(4))) {
       case 0:
         return Waves.sawh(10);
       case 1:
@@ -28,8 +42,6 @@ class Scale {
         return Waves.randomNHarms(6);
       case 3:
         return Waves.triangleh(4);
-      case 4:
-        return Waves.randomNoise();
     }
     
     return Waves.SINE;
@@ -44,32 +56,37 @@ class Person {
   BitCrush crush;
   Oscil osc, lfo;
   AudioOutput output;
+  Gain g;
+  float scale;
   
-  Person(float delaytime, float feedback, float lfoFreq, float bitRes, AudioOutput out) {
+  Person(float delaytime, float interval, float lfoFreq, float bitRes, AudioOutput out) {
     output = out;
     
-    delay = new Delay(1.0, feedback, true, true );
+    delay = new Delay(1.0, 0.8, true, true );
     delay.setDelTime(delaytime);
     
     String pitch = s.nextPitch();
     Waveform oscWave = s.nextWaveform();
     print(pitch);
-    osc = new Oscil( bitRes*800, 0.2, oscWave );
+    scale = s.nextMultiple();
+    osc = new Oscil( bitRes*scale, 0.2, oscWave );
     
-    lfoWave = Waves.square( 0.9 );
-    lfo = new Oscil(lfoFreq , 0.3, lfoWave );
+    lfoWave = Waves.triangleh( 10 );
+    lfo = new Oscil(lfoFreq , interval, lfoWave );
     
     lfo.offset.setLastValue( 0.3 );
     lfo.patch( osc.amplitude );
     
     crush = new BitCrush(bitRes, 44100.0);
     
-    osc.patch(delay).patch(output);
+    g = new Gain(-20.0);
+    
+    osc.patch(delay).patch(g).patch(output);
   }
   
-  void updateParameters(float delaytime, float feedback, float lfoFreq, float bitRes) {
+  void updateParameters(float delaytime, float interval, float lfoFreq, float bitRes) {
     delay.setDelTime(delaytime);
-    delay.setDelAmp(feedback);
+    lfo.setAmplitude(interval);
     lfo.setFrequency(lfoFreq);
     osc.setFrequency(bitRes*800);
   }
