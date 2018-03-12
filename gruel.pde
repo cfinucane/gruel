@@ -3,6 +3,8 @@
 
 import SimpleOpenNI.*;
 import java.util.Map;
+import ddf.minim.*;
+import ddf.minim.ugens.*;
 
 SimpleOpenNI  context;
 color[]       userClr = new color[]{ color(255,0,0),
@@ -14,11 +16,14 @@ color[]       userClr = new color[]{ color(255,0,0),
                                    };
 
 Map<Integer, Person> people = new HashMap<>();
+Minim minim;
+AudioOutput out;
 
 void setup()
 {
   size(640,480);
   setupKinect();
+  setupAudio();
 }
 
 void setupKinect()
@@ -42,6 +47,12 @@ void setupKinect()
   stroke(0,0,255);
   strokeWeight(3);
   smooth();  
+}
+
+void setupAudio()
+{
+  minim = new Minim(this);
+  out = minim.getLineOut();
 }
 
 void draw() {
