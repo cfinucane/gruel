@@ -54,7 +54,7 @@ class Person {
     String pitch = s.nextPitch();
     Waveform oscWave = s.nextWaveform();
     print(pitch);
-    osc = new Oscil( Frequency.ofPitch(pitch), 0.2, oscWave );
+    osc = new Oscil( bitRes*800, 0.2, oscWave );
     
     lfoWave = Waves.square( 0.9 );
     lfo = new Oscil(lfoFreq , 0.3, lfoWave );
@@ -64,14 +64,14 @@ class Person {
     
     crush = new BitCrush(bitRes, 44100.0);
     
-    osc.patch(crush).patch(delay).patch(output);
+    osc.patch(delay).patch(output);
   }
   
   void updateParameters(float delaytime, float feedback, float lfoFreq, float bitRes) {
     delay.setDelTime(delaytime);
     delay.setDelAmp(feedback);
     lfo.setFrequency(lfoFreq);
-    crush.setBitRes(bitRes);
+    osc.setFrequency(bitRes*800);
   }
   
   void stop() {
