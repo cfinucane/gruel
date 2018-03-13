@@ -68,7 +68,7 @@ void drawKinect()
   //image(context.depthImage(),0,0);
   image(context.userImage(),0,0);
        fill(255, 255, 255);
-          rect(0, 0, 200, 400);
+          //rect(0, 0, 200, 400);
   int[] userList = context.getUsers();
   for(int i=0; i<userList.length; i++)
   {
